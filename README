@@ -1,0 +1,41 @@
+web_router is a gen_server that uses an ets table to keep track of who
+is subscribed to what route.
+
+In general other applications/processes tell web_router what route
+(path tokens: ["about"] for /about) they want to be notified of and
+where in the request cycle (hook) they want to be called.
+
+
+In general web_router has no clue about a request cycle.  It accepts
+the following when a process wants to subscribe:
+
+add(WebRouter, Hook, Module, Function, Seq)
+add(WebRouter, Hook, Path, Module, Function, Seq)
+
+WebRouter is the identifier of the web_router gen_server you wish
+to be a part of (note that multiple web_routers can exist as
+another supervisor manually starts it up).
+
+Hook is the name of the hook you wish to subscribe to.  There are no
+restrictions on what hooks you can subscribe to as web_router
+simply doesn't care.  Instead your top level application
+should define what hooks in the request cycle are available (take a
+look at web_static for examples of hooks in a request cycle).
+
+Path is the path tokens you wish to subscribe to for this Hook. Path
+is a subkey of Hook.  If no Path is defined then your subscription is
+registered under the global path.  It is up to your top level application
+to run global hooks before/after the path hooks depending on your needs.
+
+Module and Function describe the erlang module and function within that
+module to use when notifying that a hook/path as taken place.
+
+Seq is currently not used but is there to introduce folding hooks later
+on if I can figure out the right design.
+
+
+
+In general you'll want to take a look at web_static or other top level
+applications to get a feel for how to best use web_router in a request
+cycle.
+
