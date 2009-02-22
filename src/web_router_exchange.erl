@@ -220,9 +220,6 @@ run_callbacks(Callbacks, Args, RoutingKey) ->
         AccItem ++ Acc
     end, [], Callbacks).
 
-%% TODO: Should all of the route and binding management not be
-%% refactored to its own module, especially seeing as unbind will have
-%% to be implemented for 0.91 ?
 delete_bindings_for_exchange(ExchangeName) ->
   [begin
      ok = mnesia:delete_object(web_reverse_route,
