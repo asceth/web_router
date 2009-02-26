@@ -194,7 +194,8 @@ match_bindings(#exchange{name = Name}, Match, RoutingKey, Args) ->
                                 mnesia:table(web_route),
                               ExchangeName == Name,
                               Match(Binding)]),
-  run_callbacks(mnesia:async_dirty(fun qlc:e/1, [Query]), Args, RoutingKey).
+  Result = mnesia:async_dirty(fun qlc:e/1, [Query]),
+  run_callbacks(Result, Args, RoutingKey).
 
 match_routing_key(#exchange{name = Name}, RoutingKey, Args) ->
   MatchHead = #route{binding = #binding{exchange_name = Name,
@@ -206,7 +207,7 @@ match_routing_key(#exchange{name = Name}, RoutingKey, Args) ->
 run_callbacks(Callbacks, Args, RoutingKey) ->
   lists:foldl(
     fun(Callback, Acc) ->
-        AccItem = case catch Callback(Args) of
+        AccItem = case catch apply(Callback, Args) of
                     {'EXIT', Reason} ->
                       ?ERROR_MSG("~p~nrunning route: ~p", [Reason, RoutingKey]),
                       [];
@@ -217,7 +218,7 @@ run_callbacks(Callbacks, Args, RoutingKey) ->
                     Result ->
                       Result
                   end,
-        AccItem ++ Acc
+        [AccItem|Acc]
     end, [], Callbacks).
 
 delete_bindings_for_exchange(ExchangeName) ->
