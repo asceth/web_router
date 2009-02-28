@@ -9,11 +9,28 @@
 -module(web_router).
 
 %% External API
--export([key/1]).
+-export([load_bindings/2]).
+-export([key/1, id/2]).
 
 -include("logger.hrl").
 -include_lib("eunit/include/eunit.hrl").
 
+
+-spec(load_bindings/2 :: (list(), list()) -> ok).
+load_bindings(_WebExchangeName, []) ->
+  ok;
+load_bindings(WebExchangeName, [Head|Tail]) ->
+  {Key, Callback} = Head,
+  web_router_exchange:add_binding(WebExchangeName, Callback, Key),
+  load_bindings(WebExchangeName, Tail).
+
+-spec(id/2 :: (list(), integer()) -> integer() | list()).
+id([], _Num) ->
+  undefined;
+id([Head|_Tail], 1) ->
+  list_to_integer(Head);
+id([_Head|Tail], Num) ->
+  id(Tail, Num-1).
 
 -spec(key/1 :: (list()) -> binary()).
 key([]) ->
