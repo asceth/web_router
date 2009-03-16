@@ -42,6 +42,8 @@ key([], Acc) ->
   list_to_binary(lists:flatten(lists:reverse(Acc)));
 key([H|T], []) ->
   key(T, [to_list(H)]);
+key([""|T], Acc) ->
+  key(T, Acc);
 key([H|T], Acc) ->
   Str = "." ++ to_list(H),
   key(T, [Str|Acc]).
@@ -68,6 +70,7 @@ key_test_() ->
    ?_assertEqual(key(["get", "request", "global"]), <<"get.request.global">>),
    ?_assertEqual(key(["get", "request", global]), <<"get.request.global">>),
    ?_assertEqual(key(["get", "request", "users", 12]), <<"get.request.users.12">>),
-   ?_assertEqual(key([get, request|["users", 12]]), <<"get.request.users.12">>)
+   ?_assertEqual(key([get, request|["users", 12]]), <<"get.request.users.12">>),
+   ?_assertEqual(key([get, request, "", "users"]), <<"get.request.users">>)
   ].
 
